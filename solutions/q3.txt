@@ -1,0 +1,15 @@
+CREATE TABLE weather_statistics (
+  id BIGSERIAL AUTO_INCREMENT PRIMARY KEY,
+  avg_max_temp NUMERIC(5,2) NULL,
+  avg_min_temp NUMERIC(5,2) NULL,
+  total_precipitation NUMERIC(5,2) NULL
+);
+
+
+INSERT INTO weather_statistics (avg_max_temp, avg_min_temp, total_precipitation)
+SELECT
+  AVG(max_temp) as avg_max_temp,
+  AVG(min_temp) as avg_min_temp,
+  SUM(precipitation) as total_precipitation
+FROM weather_data
+GROUP BY date;

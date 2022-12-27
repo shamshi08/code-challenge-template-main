@@ -1,0 +1,81 @@
+import mysql.connector
+from datetime import datetime
+
+# Connect to the database
+db = mysql.connector.connect(
+    host="localhost",
+    user="yourusername",
+    password="yourpassword",
+    database="yourdatabase"
+)
+
+cursor = db.cursor()
+start_time = datetime.now()
+total_records = 0
+
+def check_sql_string(sql, values):
+    unique = "%PARAMETER%"
+    sql = sql.replace("?", unique)
+    for v in values: sql = sql.replace(unique, repr(v), 1)
+    return sql
+
+
+
+print(check_sql_string(query,values))
+
+# Open the weather data file
+with open("weather_data.txt", "r") as weather_file:
+    # Iterate through each line in the file
+    for line in weather_file:
+        # Split the line into a list of values
+        values = line.split(",")
+
+        # Assign the values to variables
+        date = values[0]
+        max_temp = values[1]
+        min_temp = values[2]
+        precipitation = values[3]
+
+        query="""SELECT * FROM weather_data
+                   WHERE date = ? AND max_temp = ? AND min_temp = ? AND precipitation = ?"""
+		values = (date, max_temp, min_temp, precipitation)
+
+        exists = cursor.execute(check_sql_string(query,values))
+        if not exists:
+        # Use the INSERT statement to insert the values into the weather table
+        	cursor.execute("INSERT INTO weather_data (date, max_temp, min_temp, precipitation) VALUES (%s, %s, %s, %s)", (date, max_temp, min_temp, precipitation))
+            total_records+=1
+
+# Open the yield data file
+with open("yield_data.txt", "r") as yield_file:
+    # Iterate through each line in the file
+
+    for line in yield_file:
+        # Split the line into a list of values
+        values = line.split(",")
+
+        # Assign the values to variables
+        year = values[0]
+        yield = values[1]
+
+        query="""SELECT * FROM yield_data
+                   WHERE year = ? AND yield = ?"""
+		values = (year, yield)
+
+        exists = cursor.execute(check_sql_string(query,values))
+        if not exists:
+        # Use the INSERT statement to insert the values into the yield table
+        	cursor.execute("INSERT INTO yield_data (year, yield) VALUES (%s, %s)", (year, yield))
+            total_records+=1
+
+end_time = datetime.now()
+
+print("Total execution time", end_time-start_time)
+print("Total number of rows inserted", total_records)
+
+# Commit the changes to the database
+db.commit()
+
+# Close the cursor and connection
+cursor.close()
+db.close()

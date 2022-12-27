@@ -1,0 +1,13 @@
+CREATE TABLE weather_data (
+    id BIGSERIAL AUTO_INCREMENT PRIMARY KEY,
+    date VARCHAR(255) NOT NULL,
+  	max_temp NUMERIC NOT NULL,
+  	min_temp NUMERIC NOT NULL,
+  	precipitation NUMERIC NOT NULL
+);
+
+CREATE TABLE yield_data (
+    id BIGSERIAL AUTO_INCREMENT PRIMARY KEY,
+    year VARCHAR(255) NOT NULL,
+    yield NUMERIC NOT NULL
+);
