@@ -1,0 +1,103 @@
+from flask import Flask, requests
+from flask_sqlalchemy import SQLAlchemy, Pagination
+
+
+app = Flask(name)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'DATABASE_URI'
+db = SQLAlchemy(app)
+
+class WeatherData(db.Model):
+
+    tablename = "weather_data"
+
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    date = db.Column(db.String
+    max_temp = db.Column(db.Integer)
+    min_temp = db.Column(db.Integer)
+    precipitation = db.Column(db.Integer)
+
+class YieldData(db.Model):
+
+    tablename = "yield_data"
+
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    year = db.Column(db.String
+    yield = db.Column(db.Integer)
+
+
+class WeatherStatistics(db.Model):
+
+    tablename = "weather_statistics"
+
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    avg_max_temp = db.Column(db.Integer)
+    avg_min_temp = db.Column(db.Integer)
+    total_precipitation = db.Column(db.Integer)
+
+
+@app.route('/api/weather')
+def weatherdata():
+    date = request.args.get("date")
+    rows_per_page = request.args.get("rows_per_page", None)
+    page = request.args.get("page", None)
+    if date:
+        row_data = db.session.query(WeatherData).filter(WeatherData.date == date).paginate(page=page,per_page=rows_per_page,error_out=False,max_per_page=50)
+    else:
+        row_data = db.session.query(WeatherData).paginate(page=page,per_page=rows_per_page,error_out=False,max_per_page=50)
+    data_list = []
+    for data in row_data:
+        dic = {
+            "date": data.date
+            "max_temp": data.max_temp,
+            "min_temp": data.min_temp,
+            "precipitation": data.precipitation
+        }
+        data_list.append(dic)
+    response = {
+        "data": data_list
+    }
+    return response
+
+@app.route('/api/yield')
+def yielddata():
+    year = request.args.get("year")
+    rows_per_page = request.args.get("rows_per_page", None)
+    page = request.args.get("page", None)
+    if year:
+        row_data = db.session.query(YieldData).filter(
+            YieldData.year == year).paginate(page=page,per_page=rows_per_page,error_out=False,max_per_page=50)
+    else:
+        row_data = db.session.query(YieldData).paginate(page=page,per_page=rows_per_page,error_out=False,max_per_page=50)
+    data_list = []
+    for data in row_data:
+        dic = {
+            "year": data.year
+            "yield": data.yield
+        }
+        data_list.append(dic)
+    response = {
+        "data": data_list
+    }
+    return response
+
+@app.route('/api/weather/stats')
+def weatherstats():
+    rows_per_page = request.args.get("rows_per_page", None)
+    page = request.args.get("page", None)
+    row_data = db.session.query(WeatherStatistics).paginate(page=page,per_page=rows_per_page,error_out=False,max_per_page=50)
+    data_list = []
+    for data in row_data:
+        dic = {
+            "avg_max_temp": data.avg_max_temp
+            "avg_min_temp": data.avg_min_temp,
+            "total_precipitation": data.total_precipitation
+        }
+        data_list.append(dic)
+    response = {
+        "data": data_list
+    }
+    return response
+
+
+if name == "main":
+    app.run(debug=True)
